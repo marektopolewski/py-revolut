@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    .spaced-input {
+      margin-bottom: 1rem;
+    }
+  </style>
+
+  <title>PyRevolut</title>
+</head>
+
+<body style="width: 50%; max-width: 800px; min-width: 500px; margin: auto">
+  <h1 style="margin-top: 1rem; margin-bottom: 2rem">PyRevolut</h1>
+  <form action="/api/transaction" method="POST">
+    <!-- INPUT: Origin account -->
+    <div class="form-group row spaced-input">
+      <label for="from" class="col-sm-3 col-form-label">From</label>
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="from" name="from"
+          placeholder="Origin account" required>
+      </div>
+    </div>
+
+    <!-- INPUT: Target account -->
+    <div class="form-group row spaced-input">
+      <label for="to" class="col-sm-3 col-form-label">To</label>
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="to" name="to"
+          placeholder="Target account" required>
+      </div>
+    </div>
+  
+    <!-- INPUT: Value -->
+    <div class="form-group row spaced-input">
+      <label for="value" class="col-sm-3 col-form-label">Value (in USD)</label>
+      <div class="col-sm-9">
+        <input type="number" class="form-control" id="value" name="value" value="0.00"
+          min="-1000.00" max="1000.00" step="0.01" required>
+      </div>
+    </div>
+
+    <button class="btn btn-primary">Submit</button>
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
