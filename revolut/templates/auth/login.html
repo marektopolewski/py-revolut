@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    .spaced-input {
+      margin-bottom: 1rem;
+    }
+  </style>
+
+  <title>PyRevolut: Login</title>
+</head>
+
+<body style="width: 50%; max-width: 800px; min-width: 500px; margin: auto">
+
+  <div style="display: flex; align-items: baseline; margin-top: 1rem">
+    <h2 style="color: gray">PyRevolut</h2>
+    <h1 style="color: gray">.</h1>
+    <h1>Login</h1>
+  </div>
+  <br/>
+
+  <form id="loginForm" onsubmit="onSubmit(event)" method="POST" oninput="clearInvalid()">
+
+    <!-- INPUT: Username -->
+    <div class="form-group row spaced-input">
+      <label for="username" class="col-sm-3 col-form-label">Username</label>
+      <div class="col-sm-9">
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">👤</div>
+          </div>
+          <input type="text" class="form-control" id="username" name="username"
+            placeholder="Enter your username" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT: Password -->
+    <div class="form-group row spaced-input">
+      <label for="password" class="col-sm-3 col-form-label">Password</label>
+      <div class="col-sm-9">
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">🔒</div>
+          </div>
+          <input type="password" class="form-control" id="password" name="password"
+            placeholder="Enter your password" required>
+          <div class="invalid-feedback">
+            Incorrect username or password
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 1rem">
+      <button class="btn btn-primary" style="width: 100%; max-width: 300px; min-width: 100px">
+        Login
+      </button>
+    </div>
+  
+    <div style="display: flex; justify-content: center; margin-top: 1rem">
+      <small class="text-muted">
+        Don't have an account yet?
+        <a href="/auth/register">Register here</a>
+      </small>
+    </div>
+  </form>
+
+  <script>
+    async function onSubmit(event) {
+      event.preventDefault();
+      const response = await window.fetch("/auth/login", {
+        method: "POST",
+        body: new FormData(event.target)
+      });
+      if (!response.ok) {
+        document.getElementById("username").classList.add("is-invalid");
+        document.getElementById("password").classList.add("is-invalid");
+        return;
+      }
+      window.navigation.navigate('/');
+
+    }
+
+    function clearInvalid() {
+      document.getElementById("username").classList.remove("is-invalid");
+      document.getElementById("password").classList.remove("is-invalid");
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+  crossorigin="anonymous"></script>
+
+</body>
+
+</html>

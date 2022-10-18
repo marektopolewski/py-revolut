@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    .spaced-input {
+      margin-bottom: 1rem;
+    }
+  </style>
+
+  <title>PyRevolut: Register</title>
+</head>
+
+<body style="width: 50%; max-width: 800px; min-width: 500px; margin: auto">
+
+  <div style="display: flex; align-items: baseline; margin-top: 1rem">
+    <h2 style="color: gray">PyRevolut</h2>
+    <h1 style="color: gray">.</h1>
+    <h1>Register</h1>
+  </div>
+  <br/>
+
+  <form id="registerForm" onsubmit="onSubmit(event)" method="POST">
+    <!-- INPUT: First name -->
+    <div class="form-group row spaced-input">
+      <label for="fname" class="col-sm-3 col-form-label">First name</label>
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="fname" name="fname"
+          placeholder="Your first name" pattern="[A-Za-z]+" required>
+      </div>
+    </div>
+
+    <!-- INPUT: Last name -->
+    <div class="form-group row spaced-input">
+      <label for="lname" class="col-sm-3 col-form-label">Last name</label>
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="lname" name="lname"
+          placeholder="Your last name" pattern="[A-Za-z]+" required>
+      </div>
+    </div>
+    <br/><br/>
+
+    <!-- INPUT: Email address -->
+    <div class="form-group row spaced-input">
+      <label for="email" class="col-sm-3 col-form-label">Email</label>
+      <div class="col-sm-9">
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">📫</div>
+          </div>
+          <input type="email" class="form-control" id="email" name="email"
+            placeholder="Your email address" aria-describedby="emailHelp" required>
+        </div>
+        <small id="emailHelp" class="form-text text-muted">
+          Use a vaild email address, we will use this to contact you.
+        </small>
+      </div>
+    </div>
+
+    <!-- INPUT: Username -->
+    <div class="form-group row spaced-input">
+      <label for="username" class="col-sm-3 col-form-label">Username</label>
+      <div class="col-sm-9">
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">👤</div>
+          </div>
+          <input type="text" class="form-control" id="username" name="username"
+            placeholder="Choose your username" aria-describedby="usernameHelp"
+            minlength="5" maxlength="20" pattern="[A-Za-z0-9\._-]+" required oninput="clearUsernameInvalid()">
+          <div class="invalid-feedback">
+            Username already taken
+          </div>
+        </div>
+        <small id="usernameHelp" class="form-text text-muted">
+          Other people will use this to reference your account. Requirements:
+          <ul>
+            <li>length: between 5 and 20</li>
+            <li>allowed characters: <i> A-Z a-z 0-9 . _ - </i></li>
+            <li>unique: cannot be assigned to another user</li>
+          </ul>
+        </small>
+      </div>
+    </div>
+    <br/>
+
+    <!-- INPUT: Password -->
+    <div class="form-group row spaced-input">
+      <label for="pass1" class="col-sm-3 col-form-label">Password</label>
+      <div class="col-sm-9">
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">🔒</div>
+          </div>
+          <input type="password" class="form-control" id="pass1" name="password"
+            placeholder="Your secret password" aria-describedby="pass1Help"
+            minlength="8" maxlength="20" required oninput="clearPassInvalid()">
+        </div>
+        <small id="pass1Help" class="form-text text-muted">
+          Make it non-trival and 8 to 20 characters long.
+        </small>
+      </div>
+    </div>
+
+    <!-- INPUT: Confirm password -->
+    <div class="form-group row spaced-input">
+      <label for="pass2" class="col-sm-3 col-form-label">Confirm password</label>
+      <div class="col-sm-9">
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">🔒</div>
+          </div>
+          <input type="password" class="form-control" id="pass2" name="confirm-password"
+            placeholder="Type your password again" aria-describedby="pass2Help"
+            minlength="8" maxlength="20" required oninput="clearPassInvalid()">
+          <div class="invalid-feedback">
+            Passwords do not match
+          </div>
+        </div>
+        <small id="pass2Help" class="form-text text-muted">
+          Must match the password above.
+        </small>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 4rem">
+      <button class="btn btn-primary" style="width: 100%; max-width: 300px; min-width: 100px">
+        Register
+      </button>
+    </div>
+  
+    <div style="display: flex; justify-content: center; margin-top: 1rem">
+      <small class="text-muted">
+        Already have an account?
+        <a href="/auth/login">Login here</a>
+      </small>
+    </div>
+  
+  </form>
+  
+  <script>
+    async function onSubmit(event) {
+      event.preventDefault();
+      let error = false;
+
+      const username = event.target["username"]?.value;
+      const usernameValid = await validUsername(username);
+      if (!usernameValid) {
+        document.getElementById("username").classList.add("is-invalid");
+        error = true;
+      }
+
+      const pass1 = event.target["pass1"]?.value;
+      const pass2 = event.target["pass2"]?.value;
+      if (!validPassword(pass1, pass2)) {
+        document.getElementById("pass1").classList.add("is-invalid");
+        document.getElementById("pass2").classList.add("is-invalid");
+        error = true;
+      }
+
+      if (!error)
+        document.getElementById("registerForm").submit();
+    }
+
+    async function validUsername(username) {
+      try {
+        const response = await window.fetch("/auth/checkusername", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: username })
+        });
+        const json = await response.json();
+        return json["valid"];
+      }
+      catch (error) {
+        alert(`Could not validate the username, error: ${error}`)
+      }
+      return false;
+    }
+
+    function validPassword(pass1, pass2) {
+      return pass1.length >= 8 && pass1 === pass2;
+    }
+
+    function clearUsernameInvalid() {
+      document.getElementById("username").classList.remove("is-invalid");
+    }
+
+    function clearPassInvalid() {
+      document.getElementById("pass1").classList.remove("is-invalid");
+      document.getElementById("pass2").classList.remove("is-invalid");
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

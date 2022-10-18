@@ -29,4 +29,3 @@ def init_db_command():
 def with_db(app):
     app.teardown_appcontext(close_db) # run after each request
     app.cli.add_command(init_db_command) # expose to 'flask' command
-    return app

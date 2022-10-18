@@ -6,9 +6,11 @@ from flask import (
     make_response,
     redirect,
     url_for,
+    session,
 )
 from revolut.transactions import add
 from revolut.db import with_db
+from revolut.auth import bp as AuthBlueprint
 
 def create_app(test_config=None):
 
@@ -29,8 +31,12 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    with_db(app)
+
     @app.get("/")
     def index():
+        if not session.get("userid"):
+            return redirect(url_for("auth.login"))
         return render_template("./index.html")
 
     @app.post("/api/transaction")
@@ -46,5 +52,7 @@ def create_app(test_config=None):
             return make_response(str(e), 400)
 
         return redirect(url_for("index"))
-
-    return with_db(app)
+    
+    app.register_blueprint(AuthBlueprint)
+    
+    return app

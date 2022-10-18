@@ -31,5 +31,5 @@ def add(username_from: str, username_to: str, amount: float):
             )
         )
         db.commit()
-    except Exception as e:
-        raise Exception("Transaction failed, error: '{}'".format(e))
+    except:
+        raise Exception("Could not add transaction to the database")

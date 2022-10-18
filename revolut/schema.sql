@@ -6,6 +6,7 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
     balance REAL NOT NULL DEFAULT 0.0
 );
 
@@ -22,7 +23,7 @@ CREATE TABLE transactions (
 
 
 -- STUB DATA
-INSERT INTO users (name, username, email, balance)
-    VALUES ('Marek Topol', 'mtopol', 'm.t@gmail.com', 20.0);
-INSERT INTO users (name, username, email, balance)
-    VALUES ('Kamil Topol', 'ktopol', 'k.t@gmail.com', 100.0);
+INSERT INTO users (name, username, email, password, balance)
+    VALUES ('Marek Topol', 'mtopol', 'm.t@gmail.com', '', 20.0);
+INSERT INTO users (name, username, email, password, balance)
+    VALUES ('Kamil Topol', 'ktopol', 'k.t@gmail.com', '', 100.0);
