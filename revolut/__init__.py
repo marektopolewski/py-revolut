@@ -37,22 +37,23 @@ def create_app(test_config=None):
     def index():
         if not session.get("userid"):
             return redirect(url_for("auth.login"))
-        return render_template("./index.html")
+        return render_template("./index.html", username=session.get("username"))
 
     @app.post("/api/transaction")
     def add_transaction():
-        try:
-            t_from = request.form['from']
-            t_to = request.form['to']
-            t_value = float(request.form['value'])
-            if not t_from.strip() or not t_from.strip() or t_value == 0:
-                raise Exception("Invalid form arguments")
-            add(t_from, t_to, t_value)
-        except Exception as e:
-            return make_response(str(e), 400)
+        t_from = request.form['from']
+        t_to = request.form['to']
+        t_value = float(request.form['value'])
+        if not t_from.strip() or not t_from.strip() or t_value == 0:
+            return make_response("Invalid or missing form arguments", 400)
+        
+        error = add(t_from, t_to, t_value)
+        if error:
+            return make_response(error, 400)
 
-        return redirect(url_for("index"))
-    
+        return make_response("success", 200)
+
+
     app.register_blueprint(AuthBlueprint)
     
     return app

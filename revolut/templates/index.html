@@ -31,13 +31,20 @@
   </div>
   <br/>
 
-  <form action="/api/transaction" method="POST">
+  <form onsubmit="onSubmit(event)" method="POST">
     <!-- INPUT: Origin account -->
     <div class="form-group row spaced-input">
       <label for="from" class="col-sm-3 col-form-label">From</label>
       <div class="col-sm-9">
-        <input type="text" class="form-control" id="from" name="from"
-          placeholder="Origin account" required>
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text" style="display: flex; justify-content: center; width: 42px">
+              <b style="color: red">-</b>
+            </div>
+          </div>
+          <input type="text" class="form-control" id="from" name="from"
+            value="{{ username }}" readonly>
+        </div>
       </div>
     </div>
 
@@ -45,8 +52,16 @@
     <div class="form-group row spaced-input">
       <label for="to" class="col-sm-3 col-form-label">To</label>
       <div class="col-sm-9">
-        <input type="text" class="form-control" id="to" name="to"
-          placeholder="Target account" required>
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text" style="display: flex; justify-content: center; width: 42px">
+              <b style="color: green">+</b>
+            </div>
+          </div>
+          <input type="text" class="form-control" id="to" name="to"
+            placeholder="Recipient's username" required oninput="clearToInvalid()">
+          <div id="to-feedback" class="invalid-feedback"></div>
+        </div>
       </div>
     </div>
   
@@ -54,13 +69,21 @@
     <div class="form-group row spaced-input">
       <label for="value" class="col-sm-3 col-form-label">Value (in USD)</label>
       <div class="col-sm-9">
-        <input type="number" class="form-control" id="value" name="value" value="0.00"
-          min="-1000.00" max="1000.00" step="0.01" required>
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">💰</div>
+          </div>
+          <input type="number" class="form-control" id="value" name="value" value="0.00"
+            min="-1000.00" max="1000.00" step="0.01" required oninput="clearValueInvalid()">
+          <div id="value-feedback" class="invalid-feedback"></div>
+        </div>
       </div>
     </div>
 
     <div style="display: flex; justify-content: center; margin-top: 3rem">
-      <button class="btn btn-primary" style="width: 100%; max-width: 300px; min-width: 100px">
+      <button id="submit-button" class="btn btn-primary"
+        style="width: 100%; max-width: 300px; min-width: 100px"
+      >
         Submit
       </button>
     </div>
@@ -68,7 +91,57 @@
 
   <script>
     function onLogout() {
-      window.navigation.navigate('/auth/logout');
+      window.navigation.navigate("/auth/logout");
+    }
+
+    async function onSubmit(event) {
+      event.preventDefault();
+
+      const button = document.getElementById("submit-button");
+      button.disabled = true;
+      button.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span class="sr-only">Loading...</span>
+      `;
+
+      const timeStart = Date.now();
+      await (async () => { 
+        const form = event.target;
+        if (parseFloat(form["value"].value) === 0)
+          return _showError("value", "Cannot send an empty transaction")
+        const response = await window.fetch("api/transaction", {
+          method: "POST",
+          body: new FormData(form)
+        });
+        if (response.ok) {
+          form.reset();
+          alert("Payment sent ✅");
+          return;
+        }
+        const json = await response.json();
+        if (json["reason"] === "user")
+          return _showError("to", json["message"])
+        if (json["reason"] === "value")
+          return _showError("value", json["message"])
+        alert(`Unknown error occurred\n\n${json["message"]}`);
+      })();
+
+      setTimeout(() => { // wait at least 500ms
+        button.disabled = false;
+        button.innerHTML = "Submit";
+      }, Math.max(0, 500 - (Date.now() - timeStart)));
+    }
+
+    function _showError(id, msg) {
+      document.getElementById(id).classList.add("is-invalid");
+      document.getElementById(`${id}-feedback`).innerHTML = msg;
+
+    }
+    function clearToInvalid() {
+      document.getElementById("to").classList.remove("is-invalid");
+    }
+    function clearValueInvalid() {
+      document.getElementById("value").classList.remove("is-invalid");
     }
   </script>
 
