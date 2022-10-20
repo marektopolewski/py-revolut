@@ -11,6 +11,7 @@ from flask import (
 from revolut.db import with_db
 from revolut.auth import bp as AuthBlueprint
 from revolut.pay import bp as PayBlueprint
+from revolut.account import bp as AccountBlueprint
 
 def create_app(test_config=None):
 
@@ -35,10 +36,11 @@ def create_app(test_config=None):
     def index():
         if not session.get("userid"):
             return redirect(url_for("auth.login"))
-        return render_template("./index.html", username=session.get("username"))
+        return render_template("index.html", username=session.get("username"))
 
     with_db(app)
     app.register_blueprint(AuthBlueprint)
     app.register_blueprint(PayBlueprint)
+    app.register_blueprint(AccountBlueprint)
     
     return app

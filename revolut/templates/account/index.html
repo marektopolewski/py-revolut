@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    .spaced-input {
+      margin-bottom: 1rem;
+    }
+  </style>
+
+  <title>PyRevolut: Account</title>
+</head>
+
+<body style="width: 50%; max-width: 800px; min-width: 500px; margin: auto">
+
+  <!-- header -->
+  <div style="display: flex; align-items: baseline; margin-top: 1rem">
+    <h2 style="color: gray">PyRevolut</h2>
+    <h1 style="color: gray">.</h1>
+    <h1>Account</h1>
+  </div>
+  <br/>
+
+  <!-- spinner -->
+  <div id="spinner" style="display: flex; justify-content: center; align-items: center; gap: 1rem">
+    <span>Loading...</span>
+    <div class="spinner-border" role="status"></div>
+  </div>
+
+  <!-- content -->
+  <div id="content" hidden>
+
+    <!-- content picker -->
+    <p>
+      <button class="btn btn-primary" id="header-details" type="button" data-toggle="collapse" data-target="#details" aria-expanded="true" aria-controls="details">
+        Details
+      </button>
+      <button class="btn btn-primary" id="header-history" type="button" data-toggle="collapse" data-target="#history" aria-expanded="false" aria-controls="history">
+        History
+      </button>
+    </p>
+
+    <!-- content pick: account details -->
+    <div id="details" class="collapse show" aria-labelledby="header-details" data-parent="#content">
+      <div class="card card-body">
+        <h5 class="card-title">Account details</h5>
+        <div class="input-group row spaced-input" style="align-items: center">
+          <label for="name" class="col-sm-3 col-form-label">Legal name</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="name" name="name" readonly>
+          </div>
+        </div>
+        <div class="input-group row spaced-input" style="align-items: center">
+          <label for="username" class="col-sm-3 col-form-label">Username</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="username" name="username" readonly>
+          </div>
+        </div>
+        <div class="input-group row spaced-input" style="align-items: center">
+          <label for="email" class="col-sm-3 col-form-label">Email address</label>
+          <div class="col-sm-9">
+            <input type="email" class="form-control" id="email" name="email" readonly>
+          </div>
+        </div>
+        <br/>
+        <div class="input-group row spaced-input" style="align-items: center">
+          <label for="balance" class="col-sm-3 col-form-label">Account balance</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="balance" name="balance" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- content pick: transaction history -->
+    <div class="collapse" id="history" aria-labelledby="header-history" data-parent="#content">
+      <div class="card card-body">
+        <h5 class="card-title">Transaction history</h5>
+        <div id="transactions" class="list-group"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = async () => {
+      try {
+        const response = await window.fetch("/account/fetch");
+        if (!response.ok)
+          throw Error("Request failed");
+        const json = await response.json();
+        populateDetails(json["details"]);
+        populateHistory(json["history"]);
+        onContentLoaded(true);
+      }
+      catch (error) {
+        console.log(error);
+        onContentLoaded(false);
+      }
+    };
+
+    function onContentLoaded(success) {
+      document.getElementById("spinner").hidden = true;
+      document.getElementById("content").hidden = false;
+      if (!success)
+        alert("Account details could not be downloaded, try again later");
+    }
+
+    function formatCash(value) {
+      const balanceOpts = { style: "currency", currency: "USD" };
+      return new Intl.NumberFormat('en-IN', balanceOpts).format(value);
+    }
+
+    function populateDetails(data) {
+      document.getElementById("name").value = data["name"];
+      document.getElementById("username").value = data["username"];
+      document.getElementById("email").value = data["email"];
+      document.getElementById("balance").value = formatCash(data["balance"]);
+    }
+
+    function populateHistory(data) {
+      const listNode = document.getElementById("transactions");
+      data.forEach(t => {
+        const node = document.createElement("button");
+        node.type = "button";
+        node.classList = `list-group-item list-group-item-${t["outgoing"] ? "danger" : "success"}`;
+        node.innerHTML = formatCash(t["amount"]);
+        listNode.appendChild(node);
+      })
+    }
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>

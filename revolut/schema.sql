@@ -22,8 +22,12 @@ CREATE TABLE transactions (
 );
 
 
--- STUB DATA
+-- STUB DATA --
 INSERT INTO users (name, username, email, balance, password)
     VALUES ('Marek Topol', 'mtopol', 'm.t@gmail.com', 20.0, 'pbkdf2:sha256:260000$Dgj2Sa6nNv9J1uQH$07e45c3a7bb93099f7868dfe734b2f990d00675fc88de147f6b13f665158ad73');
 INSERT INTO users (name, username, email, balance, password)
     VALUES ('Kamil Topol', 'ktopol', 'k.t@gmail.com', 100.0, 'pbkdf2:sha256:260000$Dgj2Sa6nNv9J1uQH$07e45c3a7bb93099f7868dfe734b2f990d00675fc88de147f6b13f665158ad73');
+INSERT INTO transactions (user_from, user_to, amount, pending)
+    VALUES (1, 2, 101.1, false);
+INSERT INTO transactions (user_from, user_to, amount, pending)
+    VALUES (2, 1, 0.99, true);
