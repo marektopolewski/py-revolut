@@ -109,8 +109,8 @@
         const form = event.target;
         if (parseFloat(form["value"].value) === 0)
           return _showError("value", "Cannot send an empty transaction")
-        const response = await window.fetch("api/transaction", {
-          method: "POST",
+        const response = await window.fetch("/pay", {
+          method: "PUT",
           body: new FormData(form)
         });
         if (response.ok) {
@@ -119,6 +119,7 @@
           return;
         }
         const json = await response.json();
+        console.log(json)
         if (json["reason"] === "user")
           return _showError("to", json["message"])
         if (json["reason"] === "value")
