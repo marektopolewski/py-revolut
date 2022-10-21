@@ -38,10 +38,10 @@
 
     <!-- content picker -->
     <p>
-      <button class="btn btn-primary" id="header-details" type="button" data-toggle="collapse" data-target="#details" aria-expanded="true" aria-controls="details">
+      <button class="btn btn-primary" id="header-details" type="button" data-toggle="collapse" data-target="#details" aria-expanded="false" aria-controls="details">
         Details
       </button>
-      <button class="btn btn-primary" id="header-history" type="button" data-toggle="collapse" data-target="#history" aria-expanded="false" aria-controls="history">
+      <button class="btn btn-primary" id="header-history" type="button" data-toggle="collapse" data-target="#history" aria-expanded="true" aria-controls="history">
         History
       </button>
     </p>
@@ -79,7 +79,7 @@
     </div>
   
     <!-- content pick: transaction history -->
-    <div class="collapse" id="history" aria-labelledby="header-history" data-parent="#content">
+    <div id="history" class="collapse" aria-labelledby="header-history" data-parent="#content">
       <div class="card card-body">
         <h5 class="card-title">Transaction history</h5>
         <div id="transactions" class="list-group"></div>
@@ -113,7 +113,11 @@
 
     function formatCash(value) {
       const balanceOpts = { style: "currency", currency: "USD" };
-      return new Intl.NumberFormat('en-IN', balanceOpts).format(value);
+      return new Intl.NumberFormat("en-IN", balanceOpts).format(value);
+    }
+    function formatDate(value) {
+      const dateOpts = { day: "numeric", month: "short", year: "numeric" };
+      return new Date(value).toLocaleDateString("en-IN", dateOpts);
     }
 
     function populateDetails(data) {
@@ -127,10 +131,43 @@
       const listNode = document.getElementById("transactions");
       data.forEach(t => {
         const node = document.createElement("button");
+        node.onclick = () => {
+          window.navigation.navigate(`/account/transaction/${t["id"]}`)
+        };
+        listNode.appendChild(node);
+
         node.type = "button";
         node.classList = `list-group-item list-group-item-${t["outgoing"] ? "danger" : "success"}`;
-        node.innerHTML = formatCash(t["amount"]);
-        listNode.appendChild(node);
+        node.style.display = "flex";
+        node.style.gap = "1rem";
+        node.style.justifyContent = "space-between";
+        node.style.fontSize = "smaller";
+
+        const cash = document.createElement("div");
+        node.appendChild(cash);
+        const pending = document.createElement("span");
+        cash.appendChild(pending);
+        const value = document.createElement("span");
+        cash.appendChild(value);
+
+        cash.style.display = "flex";
+        cash.style.gap = "1rem";
+        pending.style.width = "16px";
+        pending.innerHTML = t["pending"] ? "⏱" : "";
+        value.style.fontWeight = "bold";
+        value.innerHTML = formatCash(t["amount"]);
+
+        const from = document.createElement("span");
+        node.appendChild(from);
+
+        from.style.flex = "1";
+        from.style.textAlign = "end";
+        from.innerHTML = `from ${t["name"]}`;
+
+        const date = document.createElement("span");
+        node.appendChild(date);
+
+        date.innerHTML = formatDate(t["created"]);
       })
     }
   </script>
