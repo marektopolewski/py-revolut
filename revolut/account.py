@@ -3,28 +3,29 @@ from flask import (
     session,
     render_template,
     make_response,
+    request
 )
 from revolut.db import get_db
 
 bp = Blueprint("account", __name__, url_prefix="/account")
 
-@bp.route("/", methods=("GET",))
+@bp.route("/", methods=("GET", "POST"))
 def account():
-    if not session.get("userid"):
-        return make_response("You must be logged in to access this page", 401)
-    return render_template("account/index.html")
-
-@bp.route("/fetch", methods=("GET", "POST"))
-def get_user_and_transactions():
     session_user_id = session.get("userid")
     if not session_user_id:
         return make_response("You must be logged in to access this page", 401)
+
+    if request.method == "GET":
+        return render_template("account/index.html")
 
     db = get_db()
     details = db.execute(
         "SELECT * FROM users WHERE id=?",
         (session_user_id,)
     ).fetchone()
+
+    if not details:
+        return make_response("Could not find the user in the database", 500)
     
     history = db.execute("""
             SELECT
@@ -50,6 +51,45 @@ def get_user_and_transactions():
         "history": _rows_to_dict(history)
     }, 200)
 
+@bp.route("/transaction/<int:transaction_id>", methods=("GET", "POST"))
+def get_transaction(transaction_id):
+    session_user_id = session.get("userid")
+    if not session_user_id:
+        return make_response("You must be logged in to access this page", 401)
+
+    if request.method == "GET":
+        return render_template("account/transaction.html", id=transaction_id)
+    
+    db = get_db()
+    transaction = db.execute(
+        """
+        SELECT *
+        FROM transactions
+        WHERE id=? AND (user_from=? OR user_to=?)
+        """, (transaction_id, session_user_id, session_user_id)
+    ).fetchone()
+
+    if not transaction:
+        return make_response("Could not find the transaction in the database", 500)
+
+    user_from = db.execute(
+        "SELECT username, name FROM users WHERE id=?", (transaction["user_from"],)
+    ).fetchone()
+    if not user_from:
+        return make_response("Could not find the transaction in the database", 500)
+
+    user_to = db.execute(
+        "SELECT username, name FROM users WHERE id=?", (transaction["user_to"],)
+    ).fetchone()
+    if not user_to:
+        return make_response("Could not find the transaction in the database", 500)
+    
+    return make_response({
+        "transaction": _row_to_dict(transaction),
+        "from": _row_to_dict(user_from),
+        "to": _row_to_dict(user_to),
+    }, 200)
+    
 
 from sqlite3 import Row
 def _row_to_dict(row: Row):

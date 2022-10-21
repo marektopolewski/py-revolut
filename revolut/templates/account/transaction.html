@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    .spaced-card {
+      margin-top: 1rem;
+    }
+    .spaced-input {
+      margin-bottom: 0.5rem;
+      font-size: smaller;
+      align-items: center;
+    }
+  </style>
+
+  <title>PyRevolut: Transactions</title>
+</head>
+
+<body style="width: 50%; max-width: 800px; min-width: 500px; margin: auto">
+
+  <!-- header -->
+  <div style="display: flex; align-items: baseline; margin-top: 1rem">
+    <h2 style="color: gray">PyRevolut</h2>
+    <h1 style="color: gray">.</h1>
+    <h1>Transactions</h1>
+  </div>
+
+  <!-- spinner -->
+  <div id="spinner" style="display: flex; justify-content: center; align-items: center; gap: 1rem">
+    <span>Loading...</span>
+    <div class="spinner-border" role="status"></div>
+  </div>
+
+  <!-- content -->
+  <div id="content" style="margin-top: 2rem"  hidden>
+    <h5>Transaction {{ id }} details</h5>
+
+      <!-- details -->
+      <div class="card card-body spaced-card">
+        <div class="input-group row spaced-input">
+          <label for="detail-value" class="col-sm-3 col-form-label">Value</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="detail-value" name="detail-value" readonly>
+          </div>
+        </div>
+        <div class="input-group row spaced-input">
+          <label for="detail-date" class="col-sm-3 col-form-label">Date</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="detail-date" name="detail-date" readonly>
+          </div>
+        </div>
+        <div class="input-group row spaced-input">
+          <label for="detail-status" class="col-sm-3 col-form-label">Status</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="detail-status" name="detail-status" readonly>
+          </div>
+        </div>
+      </div>
+
+    <!-- from -->
+    <div class="card card-body spaced-card">
+      <h6 class="card-title">From</h6>
+      <div class="input-group row spaced-input">
+        <label for="from-username" class="col-sm-3 col-form-label">Username</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="from-username" name="from-username" readonly>
+        </div>
+      </div>
+      <div class="input-group row spaced-input">
+        <label for="from-name" class="col-sm-3 col-form-label">Legal name</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="from-name" name="from-name" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- to -->
+    <div class="card card-body spaced-card">
+      <h6 class="card-title">To</h6>
+      <div class="input-group row spaced-input">
+        <label for="to-username" class="col-sm-3 col-form-label">Username</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="to-username" name="to-username" readonly>
+        </div>
+      </div>
+      <div class="input-group row spaced-input">
+        <label for="to-name" class="col-sm-3 col-form-label">Legal name</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="to-name" name="to-name" readonly>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <script>
+    window.onload = async () => {
+      try {
+        const response = await window.fetch("/account/transaction/{{ id }}", { method: "POST" });
+        if (!response.ok)
+          throw Error("Request failed");
+        const json = await response.json();
+        populateDetails(json["transaction"]);
+        populateUser("from", json["from"]);
+        populateUser("to", json["to"]);
+        onContentLoaded(true);
+      }
+      catch (error) {
+        console.log(error);
+        onContentLoaded(false);
+      }
+    };
+
+    function populateDetails(transaction) {
+      document.getElementById("detail-value").value = formatCash(transaction["amount"]);
+      document.getElementById("detail-date").value = formatDate(transaction["created"]);
+      document.getElementById("detail-status").value = transaction["pending"] ? "Pending" : "Completed";
+    }
+    function populateUser(label, data) {
+      document.getElementById(`${label}-username`).value = data["username"];
+      document.getElementById(`${label}-name`).value = data["name"];
+    }
+
+    function onContentLoaded(success) {
+      document.getElementById("spinner").hidden = true;
+      document.getElementById("content").hidden = false;
+      if (!success)
+        alert("Transaction details could not be downloaded, try again later");
+    }
+
+    function formatCash(value) {
+      const balanceOpts = { style: "currency", currency: "USD" };
+      return new Intl.NumberFormat("en-IN", balanceOpts).format(value);
+    }
+    function formatDate(value) {
+      const dateOpts = { hour: "numeric", minute: "numeric", day: "numeric", month: "short", year: "numeric" };
+      return new Date(value).toLocaleDateString("en-IN", dateOpts);
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+  crossorigin="anonymous"></script>
+
+</body>
+
+</html>
