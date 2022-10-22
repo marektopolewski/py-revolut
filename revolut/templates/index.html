@@ -12,6 +12,11 @@
     .spaced-input {
       margin-bottom: 1rem;
     }
+    .alert-pos {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
   </style>
 
   <title>PyRevolut</title>
@@ -95,16 +100,25 @@
     </div>
   </form>
 
-  <script>
-    function onAccount() {
+  <div id="success-alert" class="alert alert-success alert-pos" role="alert" hidden></div>
+  <div id="danger-alert" class="alert alert-danger alert-pos" role="alert" hidden></div>
+  <div id="warning-alert" class="alert alert-warning alert-pos" role="alert" hidden></div>
 
-    }
+  <script>
     function onLogout() {
       window.navigation.navigate("/auth/logout");
     }
-  </script>
 
-  <script>
+    function showAlert(status, message) {
+      const alert = document.getElementById(`${status}-alert`);
+      alert.innerHTML = message;
+      alert.hidden = false;
+      setTimeout(() => {
+        alert.innerHTML = "";
+        alert.hidden = true;
+      }, 2000);
+    }
+
     async function onSubmit(event) {
       event.preventDefault();
 
@@ -126,7 +140,7 @@
         });
         if (response.ok) {
           form.reset();
-          alert("Payment sent ✅");
+          showAlert("success", "Payment sent successfully");
           return;
         }
         const json = await response.json();
@@ -135,7 +149,7 @@
           return _showError("to", json["message"])
         if (json["reason"] === "value")
           return _showError("value", json["message"])
-        alert(`Unknown error occurred\n\n${json["message"]}`);
+        showAlert("danger", `Unknown error occurred\n\n${json["message"]}`);
       })();
 
       setTimeout(() => { // wait at least 500ms
@@ -147,7 +161,7 @@
     function _showError(id, msg) {
       document.getElementById(id).classList.add("is-invalid");
       document.getElementById(`${id}-feedback`).innerHTML = msg;
-
+      showAlert("warning", "Payment could not be sent");
     }
     function clearToInvalid() {
       document.getElementById("to").classList.remove("is-invalid");
