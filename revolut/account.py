@@ -3,7 +3,9 @@ from flask import (
     session,
     render_template,
     make_response,
-    request
+    request,
+    redirect,
+    url_for
 )
 from revolut.db import get_db
 
@@ -13,6 +15,8 @@ bp = Blueprint("account", __name__, url_prefix="/account")
 def account():
     session_user_id = session.get("userid")
     if not session_user_id:
+        if request.method == "GET":
+            return redirect(url_for("auth.login"))
         return make_response("You must be logged in to access this page", 401)
 
     if request.method == "GET":
@@ -55,6 +59,8 @@ def account():
 def get_transaction(transaction_id):
     session_user_id = session.get("userid")
     if not session_user_id:
+        if request.method == "GET":
+            return redirect(url_for("auth.login"))
         return make_response("You must be logged in to access this page", 401)
 
     if request.method == "GET":
